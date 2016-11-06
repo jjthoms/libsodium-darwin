@@ -28,7 +28,7 @@ def download_and_extract_libsodium()
 end
 
 def find_sdks
-  sdks=`xcodebuild -showsdks`
+  sdks=`xcodebuild -showsdks`.chomp
   sdk_versions = {}
   for line in sdks.lines do
     if line =~ /-sdk iphoneos(\S+)/
@@ -54,10 +54,10 @@ VALID_ARHS_PER_PLATFORM = {
   "tvOS"    => ["arm64","i386", "x86_64"],
   "watchOS" => ["armv7k","i386", "x86_64"],
 }
-DEVELOPER               = `xcode-select -print-path`
-LIPO                    = `xcrun -sdk iphoneos -find lipo`
+DEVELOPER               = `xcode-select -print-path`.chomp
+LIPO                    = `xcrun -sdk iphoneos -find lipo`.chomp
 # Script's directory
-SCRIPTDIR               = File.dirname(__FILE__)
+SCRIPTDIR               = File.absolute_path(File.dirname(__FILE__))
 # libsodium root directory
 LIBDIR                  = File.join(SCRIPTDIR, "libsodium")
 # Destination directory for build and install
@@ -90,7 +90,7 @@ FileUtils.mkdir_p BUILDDIR
 FileUtils.mkdir_p DISTDIR
 
 # Generate autoconf files
-FileUtils.cd(LIBDIR)
+#FileUtils.cd(LIBDIR)
 #exit 1 unless system('./autogen.sh')
 
 PLATFORMS = sdk_versions.keys
@@ -101,7 +101,7 @@ for platform in PLATFORMS
   archs = VALID_ARHS_PER_PLATFORM[platform]
   for arch in archs
     puts "Building #{platform}/#{arch}..."
-    build_arch_dir="#{BUILDDIR}/#{arch}"
+    build_arch_dir=File.absolute_path("#{BUILDDIR}/#{arch}")
     FileUtils.mkdir_p(build_arch_dir)
 
     case arch
@@ -120,26 +120,29 @@ for platform in PLATFORMS
     end
 
     ENV["PATH"] = "#{DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin:" +
-      "#{DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/sbin:$PATH"
+      "#{DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/sbin:#{ENV["PATH"]}"
 
     puts "Configuring for #{arch}..."
-    configure_cmd = "#{LIBDIR}/configure " +
-      "--prefix=#{build_arch_dir}" +
-      "--disable-shared " +
-      "--enable-static " +
-      "--host=#{host}"
-    puts configure_cmd
-    exit 1 unless system(configure_cmd)
+    FileUtils.cd(LIBDIR)
+    configure_cmd = [
+      "./configure",
+      "--prefix=#{build_arch_dir}",
+      "--disable-shared",
+      "--enable-static",
+      "--host=#{host}",
+    ]
+    exit 1 unless system(configure_cmd.join(" "))
 
     puts "Building #{LIBNAME} for #{arch}..."
-    FileUtils.cd(LIBDIR)
     exit 1 unless system("make clean")
     exit 1 unless system("make -j8 V=0")
     exit 1 unless system("make install")
 
-    lib_list.push "#{build_arch_dir}/lib/#{LIBNAME} "
+    lib_list.push "#{build_arch_dir}/lib/#{LIBNAME}"
   end
 end
+
+puts lib_list
 
 exit 1
 =begin
