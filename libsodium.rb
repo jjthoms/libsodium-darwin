@@ -12,56 +12,73 @@ require 'open-uri'
 # libsodium release version
 # Please visit https://github.com/jedisct1/libsodium/releases
 #
-PKG_VER="1.0.11"
 
 # Download and extract the latest stable release indicated by PKG_VER variable
-puts "Downloading latest stable release of 'libsodium'"
-libsodium_dir = "libsodium"
-FileUtils.rm_rf libsodium_dir
-libsodium_dist="libsodium-#{PKG_VER}.tar.gz"
-url = "https://github.com/jedisct1/libsodium/releases/download/#{PKG_VER}/#{libsodium_dist}"
-exit 1 unless system("curl -O -L #{url}")
-exit 1 unless system("tar xzf #{libsodium_dist}")
-FileUtils.mv "libsodium-#{PKG_VER}", libsodium_dir
-FileUtils.rm_rf libsodium_dist
+def download_and_extract_libsodium()
+  puts "Downloading latest stable release of 'libsodium'"
+  libsodium_dir = "libsodium"
+  FileUtils.rm_rf libsodium_dir
+  libsodium_pkg_name = "libsodium-#{PKG_VER}"
+  libsodium_pkg="#{libsodium_pkg_name}.tar.gz"
+  url = "https://github.com/jedisct1/libsodium/releases/download/#{PKG_VER}/#{libsodium_pkg}"
+  exit 1 unless system("curl -O -L #{url}")
+  exit 1 unless system("tar xzf #{libsodium_pkg}")
+  FileUtils.mv libsodium_pkg_name, libsodium_dir
+  FileUtils.rm_rf libsodium_pkg
+end
+
+def find_sdks
+  sdks=`xcodebuild -showsdks`
+  sdk_versions = {}
+  for line in sdks.lines do
+    if line =~ /-sdk iphoneos(\S+)/
+      sdk_versions["ios"] = $1
+    elsif line =~ /-sdk macosx(\S+)/
+      sdk_versions["macos"] = $1
+    elsif line =~ /-sdk appletvos(\S+)/
+      sdk_versions["tvos"] = $1
+    elsif line =~ /-sdk watchos(\S+)/
+      sdk_versions["watchos"] = $1
+    end
+  end
+  return sdk_versions
+end
+
+PKG_VER="1.0.11"
+LIBNAME="libsodium.a"
+VALID_ARHS_PER_PLATFORM = {
+  "iOS" => ["armv7", "armv7s", "arm64", "i386", "x86_64"],
+}
+DEVELOPER=`xcode-select -print-path`
+LIPO=`xcrun -sdk iphoneos -find lipo`
+# Script's directory
+SCRIPTDIR=File.dirname(__FILE__)
+# libsodium root directory
+LIBDIR=File.join(SCRIPTDIR, "libsodium")
+# Destination directory for build and install
+DSTDIR=SCRIPTDIR
+BUILDDIR="#{DSTDIR}/libsodium_build"
+DISTDIR="#{DSTDIR}/libsodium_dist"
+DISTLIBDIR="#{DISTDIR}/lib"
+
+sdk_versions = find_sdks()
+IOS_SDK_VERSION = sdk_versions["ios"]
+MACOS_SDK_VERSION = sdk_versions["macos"]
+TVOS_SDK_VERSION = sdk_versions["tvos"]
+WATCHOS_SDK_VERSION = sdk_versions["macos"]
+
+puts "iOS     SDK version = #{IOS_SDK_VERSION}"
+puts "macOS   SDK version = #{MACOS_SDK_VERSION}"
+puts "watchOS SDK version = #{WATCHOS_SDK_VERSION}"
+puts "tvOS    SDK version = #{TVOS_SDK_VERSION}"
+
+OTHER_CFLAGS="-Os -Qunused-arguments"
+
+#download_and_extract_libsodium()
 
 exit 1
 =begin
 
-
-LIBNAME="libsodium.a"
-ARCHS=${ARCHS:-"armv7 armv7s arm64 i386 x86_64"}
-DEVELOPER=$(xcode-select -print-path)
-LIPO=$(xcrun -sdk iphoneos -find lipo)
-# Script's directory
-SCRIPTDIR=$( (cd -P $(dirname $0) && pwd) )
-# libsodium root directory
-LIBDIR=$( (cd "${SCRIPTDIR}/libsodium"  && pwd) )
-# Destination directory for build and install
-DSTDIR=${SCRIPTDIR}
-BUILDDIR="${DSTDIR}/libsodium_build"
-DISTDIR="${DSTDIR}/libsodium_dist"
-DISTLIBDIR="${DISTDIR}/lib"
-# http://libwebp.webm.googlecode.com/git/iosbuild.sh
-# Extract the latest SDK version from the final field of the form: iphoneosX.Y
-IOS_SDK_VERSION=$(xcodebuild -showsdks \
-    | grep iphoneos | sort | tail -n 1 | awk '{print substr($NF, 9)}'
-    )
-MACOS_SDK_VERSION=$(xcodebuild -showsdks \
-    | grep macos | sort | tail -n 1 | awk '{print substr($NF, 7)}'
-    )
-WATCHOS_SDK_VERSION=$(xcodebuild -showsdks \
-    | grep watchos | sort | tail -n 1 | awk '{print substr($NF, 8)}'
-    )
-TVOS_SDK_VERSION=$(xcodebuild -showsdks \
-    | grep appletvos | sort | tail -n 1 | awk '{print substr($NF, 10)}'
-    )
-echo "iOS     SDK version = ${IOS_SDK_VERSION}"
-echo "macOS   SDK version = ${MACOS_SDK_VERSION}"
-echo "watchOS SDK version = ${WATCHOS_SDK_VERSION}"
-echo "tvOS    SDK version = ${TVOS_SDK_VERSION}"
-
-OTHER_CFLAGS="-Os -Qunused-arguments"
 
 # Cleanup
 if [ -d $BUILDDIR ]
