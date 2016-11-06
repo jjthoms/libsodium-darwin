@@ -115,11 +115,13 @@ do
             #   PLATFORM=AppleTVOS
             #   appletvos10.0
             #   PLATFORM=AppleTVSimulator
+            #   tvsos-version-min?
             # watchOS
             #   watchos3.0
             #   watchsimulator3.0
             #   PLATFORM=WatchOS
             #   PLATFORM=WatchSimulator
+            #   watchos-version-min?
         *)
             echo "Unsupported architecture ${ARCH}"
             exit 1
