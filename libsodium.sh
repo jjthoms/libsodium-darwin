@@ -1,19 +1,28 @@
 #!/bin/sh
+
+#
 # A script to download and build libsodium for iOS, including arm64
 # Adapted from https://raw2.github.com/seb-m/CryptoPill/master/libsodium.sh
+#
 
+#
+# libsodium release version
+# Please visit https://github.com/jedisct1/libsodium/releases
+#
+PKG_VER=1.0.11
+
+# Download and extract the latest stable release indicated by PKG_VER variable
 rm -rf libsodium
 set -e
-curl -O -L https://github.com/jedisct1/libsodium/releases/download/0.6.1/libsodium-0.6.1.tar.gz
-tar xzf libsodium-0.6.1.tar.gz
-rm libsodium-0.6.1.tar.gz
-mv libsodium-0.6.1 libsodium
+curl -O -L https://github.com/jedisct1/libsodium/releases/download/${PKG_VER}/libsodium-${PKG_VER}.tar.gz
+tar xzf libsodium-${PKG_VER}.tar.gz
+rm libsodium-${PKG_VER}.tar.gz
+mv libsodium-${PKG_VER} libsodium
 
 LIBNAME="libsodium.a"
 ARCHS=${ARCHS:-"armv7 armv7s arm64 i386 x86_64"}
 DEVELOPER=$(xcode-select -print-path)
 LIPO=$(xcrun -sdk iphoneos -find lipo)
-#LIPO=lipo
 # Script's directory
 SCRIPTDIR=$( (cd -P $(dirname $0) && pwd) )
 # libsodium root directory
