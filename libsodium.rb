@@ -18,13 +18,13 @@ def download_and_extract_libsodium()
   puts "Downloading latest stable release of 'libsodium'"
   libsodium_dir = "libsodium"
   FileUtils.rm_rf libsodium_dir
-  libsodium_pkg_name = "libsodium-#{PKG_VER}"
-  libsodium_pkg="#{libsodium_pkg_name}.tar.gz"
-  url = "https://github.com/jedisct1/libsodium/releases/download/#{PKG_VER}/#{libsodium_pkg}"
+  pkg_name      = "libsodium-#{PKG_VER}"
+  pkg           = "#{pkg_name}.tar.gz"
+  url           = "https://github.com/jedisct1/libsodium/releases/download/#{PKG_VER}/#{pkg}"
   exit 1 unless system("curl -O -L #{url}")
-  exit 1 unless system("tar xzf #{libsodium_pkg}")
-  FileUtils.mv libsodium_pkg_name, libsodium_dir
-  FileUtils.rm_rf libsodium_pkg
+  exit 1 unless system("tar xzf #{pkg}")
+  FileUtils.mv pkg_name, libsodium_dir
+  FileUtils.rm_rf pkg
 end
 
 def find_sdks
@@ -32,11 +32,11 @@ def find_sdks
   sdk_versions = {}
   for line in sdks.lines do
     if line =~ /-sdk iphoneos(\S+)/
-      sdk_versions["ios"] = $1
+      sdk_versions["ios"]     = $1
     elsif line =~ /-sdk macosx(\S+)/
-      sdk_versions["macos"] = $1
+      sdk_versions["macos"]   = $1
     elsif line =~ /-sdk appletvos(\S+)/
-      sdk_versions["tvos"] = $1
+      sdk_versions["tvos"]    = $1
     elsif line =~ /-sdk watchos(\S+)/
       sdk_versions["watchos"] = $1
     end
@@ -44,35 +44,35 @@ def find_sdks
   return sdk_versions
 end
 
-PKG_VER="1.0.11"
-LIBNAME="libsodium.a"
+PKG_VER                 = "1.0.11"
+LIBNAME                 = "libsodium.a"
 VALID_ARHS_PER_PLATFORM = {
   "iOS" => ["armv7", "armv7s", "arm64", "i386", "x86_64"],
 }
-DEVELOPER=`xcode-select -print-path`
-LIPO=`xcrun -sdk iphoneos -find lipo`
+DEVELOPER               = `xcode-select -print-path`
+LIPO                    = `xcrun -sdk iphoneos -find lipo`
 # Script's directory
-SCRIPTDIR=File.dirname(__FILE__)
+SCRIPTDIR               = File.dirname(__FILE__)
 # libsodium root directory
-LIBDIR=File.join(SCRIPTDIR, "libsodium")
+LIBDIR                  = File.join(SCRIPTDIR, "libsodium")
 # Destination directory for build and install
-DSTDIR=SCRIPTDIR
-BUILDDIR="#{DSTDIR}/libsodium_build"
-DISTDIR="#{DSTDIR}/libsodium_dist"
-DISTLIBDIR="#{DISTDIR}/lib"
+DSTDIR                  = SCRIPTDIR
+BUILDDIR                = "#{DSTDIR}/libsodium_build"
+DISTDIR                 = "#{DSTDIR}/libsodium_dist"
+DISTLIBDIR              = "#{DISTDIR}/lib"
 
-sdk_versions = find_sdks()
-IOS_SDK_VERSION = sdk_versions["ios"]
-MACOS_SDK_VERSION = sdk_versions["macos"]
-TVOS_SDK_VERSION = sdk_versions["tvos"]
-WATCHOS_SDK_VERSION = sdk_versions["macos"]
+sdk_versions            = find_sdks()
+IOS_SDK_VERSION         = sdk_versions["ios"]
+MACOS_SDK_VERSION       = sdk_versions["macos"]
+TVOS_SDK_VERSION        = sdk_versions["tvos"]
+WATCHOS_SDK_VERSION     = sdk_versions["macos"]
 
 puts "iOS     SDK version = #{IOS_SDK_VERSION}"
 puts "macOS   SDK version = #{MACOS_SDK_VERSION}"
 puts "watchOS SDK version = #{WATCHOS_SDK_VERSION}"
 puts "tvOS    SDK version = #{TVOS_SDK_VERSION}"
 
-OTHER_CFLAGS="-Os -Qunused-arguments"
+OTHER_CFLAGS            = "-Os -Qunused-arguments"
 
 #download_and_extract_libsodium()
 
