@@ -101,7 +101,7 @@ for platform in PLATFORMS
   archs = VALID_ARHS_PER_PLATFORM[platform]
   for arch in archs
     puts "Building #{platform}/#{arch}..."
-    build_arch_dir=File.absolute_path("#{BUILDDIR}/#{arch}")
+    build_arch_dir=File.absolute_path("#{BUILDDIR}/#{platform}-#{arch}")
     FileUtils.mkdir_p(build_arch_dir)
 
     case arch
@@ -115,7 +115,8 @@ for platform in PLATFORMS
       ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} #{OTHER_CFLAGS}"
       ENV["LDFLAGS"]  = "-mthumb -arch #{arch} -isysroot #{isdk_root}"
     else
-      puts "Unsupported architecture #{arch}"
+      warn "Unsupported architecture #{arch}"
+      break
       #exit 1
     end
 
