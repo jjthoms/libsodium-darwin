@@ -94,6 +94,7 @@ FileUtils.cd(LIBDIR)
 #exit 1 unless system('./autogen.sh')
 
 PLATFORMS = sdk_versions.keys
+lib_list = []
 # Compile libsodium for each Apple device platform
 for platform in PLATFORMS
   # Compile libsodium for each valid Apple device architecture
@@ -102,6 +103,41 @@ for platform in PLATFORMS
     puts "Building #{platform}/#{arch}..."
     build_arch_dir="#{BUILDDIR}/#{arch}"
     FileUtils.mkdir_p(build_arch_dir)
+
+    case arch
+    when "armv7"
+      platform_name   = "iPhoneOS"
+      host            = "#{arch}-apple-darwin"
+      base_dir        = "#{DEVELOPER}/Platforms/#{platform_name}.platform/Developer"
+      ENV["BASEDIR"]  = base_dir
+      isdk_root       = "#{base_dir}/SDKs/#{platform_name}#{IOS_SDK_VERSION}.sdk"
+      ENV["ISDKROOT"] = isdk_root
+      ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} #{OTHER_CFLAGS}"
+      ENV["LDFLAGS"]  = "-mthumb -arch #{arch} -isysroot #{isdk_root}"
+    else
+      puts "Unsupported architecture #{arch}"
+      #exit 1
+    end
+
+    ENV["PATH"] = "#{DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin:" +
+      "#{DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/sbin:$PATH"
+
+    puts "Configuring for #{arch}..."
+    configure_cmd = "#{LIBDIR}/configure " +
+      "--prefix=#{build_arch_dir}" +
+      "--disable-shared " +
+      "--enable-static " +
+      "--host=#{host}"
+    puts configure_cmd
+    exit 1 unless system(configure_cmd)
+
+    puts "Building #{LIBNAME} for #{arch}..."
+    FileUtils.cd(LIBDIR)
+    exit 1 unless system("make clean")
+    exit 1 unless system("make -j8 V=0")
+    exit 1 unless system("make install")
+
+    lib_list.push "#{build_arch_dir}/lib/#{LIBNAME} "
   end
 end
 
@@ -109,46 +145,38 @@ exit 1
 =begin
 for ARCH in $ARCHS
 do
-    case ${ARCH} in
-        armv7)
-	    PLATFORM="iPhoneOS"
-	    HOST="${ARCH}-apple-darwin"
-	    export BASEDIR="${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer"
-	    export ISDKROOT="${BASEDIR}/SDKs/${PLATFORM}${IOS_SDK_VERSION}.sdk"
-	    export CFLAGS="-arch ${ARCH} -isysroot ${ISDKROOT} ${OTHER_CFLAGS}"
-	    export LDFLAGS="-mthumb -arch ${ARCH} -isysroot ${ISDKROOT}"
-            ;;
+    case #{ARCH} in
         armv7s)
 	    PLATFORM="iPhoneOS"
-	    HOST="${ARCH}-apple-darwin"
-	    export BASEDIR="${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer"
-	    export ISDKROOT="${BASEDIR}/SDKs/${PLATFORM}${IOS_SDK_VERSION}.sdk"
-	    export CFLAGS="-arch ${ARCH} -isysroot ${ISDKROOT} ${OTHER_CFLAGS}"
-	    export LDFLAGS="-mthumb -arch ${ARCH} -isysroot ${ISDKROOT}"
+	    HOST="#{ARCH}-apple-darwin"
+	    export BASEDIR="#{DEVELOPER}/Platforms/#{PLATFORM}.platform/Developer"
+	    export ISDKROOT="#{BASEDIR}/SDKs/#{PLATFORM}#{IOS_SDK_VERSION}.sdk"
+	    export CFLAGS="-arch #{ARCH} -isysroot #{ISDKROOT} #{OTHER_CFLAGS}"
+	    export LDFLAGS="-mthumb -arch #{ARCH} -isysroot #{ISDKROOT}"
             ;;
         arm64)
 	    PLATFORM="iPhoneOS"
 	    HOST="arm-apple-darwin"
-	    export BASEDIR="${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer"
-	    export ISDKROOT="${BASEDIR}/SDKs/${PLATFORM}${IOS_SDK_VERSION}.sdk"
-	    export CFLAGS="-arch ${ARCH} -isysroot ${ISDKROOT} ${OTHER_CFLAGS}"
-	    export LDFLAGS="-mthumb -arch ${ARCH} -isysroot ${ISDKROOT}"
+	    export BASEDIR="#{DEVELOPER}/Platforms/#{PLATFORM}.platform/Developer"
+	    export ISDKROOT="#{BASEDIR}/SDKs/#{PLATFORM}#{IOS_SDK_VERSION}.sdk"
+	    export CFLAGS="-arch #{ARCH} -isysroot #{ISDKROOT} #{OTHER_CFLAGS}"
+	    export LDFLAGS="-mthumb -arch #{ARCH} -isysroot #{ISDKROOT}"
             ;;
         i386)
 	    PLATFORM="iPhoneSimulator"
-	    HOST="${ARCH}-apple-darwin"
-	    export BASEDIR="${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer"
-	    export ISDKROOT="${BASEDIR}/SDKs/${PLATFORM}${IOS_SDK_VERSION}.sdk"
-	    export CFLAGS="-arch ${ARCH} -isysroot ${ISDKROOT} -miphoneos-version-min=${IOS_SDK_VERSION} ${OTHER_CFLAGS}"
-	    export LDFLAGS="-m32 -arch ${ARCH}"
+	    HOST="#{ARCH}-apple-darwin"
+	    export BASEDIR="#{DEVELOPER}/Platforms/#{PLATFORM}.platform/Developer"
+	    export ISDKROOT="#{BASEDIR}/SDKs/#{PLATFORM}#{IOS_SDK_VERSION}.sdk"
+	    export CFLAGS="-arch #{ARCH} -isysroot #{ISDKROOT} -miphoneos-version-min=#{IOS_SDK_VERSION} #{OTHER_CFLAGS}"
+	    export LDFLAGS="-m32 -arch #{ARCH}"
             ;;
         x86_64)
 	    PLATFORM="iPhoneSimulator"
-	    HOST="${ARCH}-apple-darwin"
-	    export BASEDIR="${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer"
-	    export ISDKROOT="${BASEDIR}/SDKs/${PLATFORM}${IOS_SDK_VERSION}.sdk"
-	    export CFLAGS="-arch ${ARCH} -isysroot ${ISDKROOT} -miphoneos-version-min=${IOS_SDK_VERSION} ${OTHER_CFLAGS}"
-	    export LDFLAGS="-arch ${ARCH}"
+	    HOST="#{ARCH}-apple-darwin"
+	    export BASEDIR="#{DEVELOPER}/Platforms/#{PLATFORM}.platform/Developer"
+	    export ISDKROOT="#{BASEDIR}/SDKs/#{PLATFORM}#{IOS_SDK_VERSION}.sdk"
+	    export CFLAGS="-arch #{ARCH} -isysroot #{ISDKROOT} -miphoneos-version-min=#{IOS_SDK_VERSION} #{OTHER_CFLAGS}"
+	    export LDFLAGS="-arch #{ARCH}"
             ;;
             # tvOS
             #   appletvsimulator10.0
@@ -162,39 +190,19 @@ do
             #   PLATFORM=WatchOS
             #   PLATFORM=WatchSimulator
             #   watchos-version-min?
-        *)
-            echo "Unsupported architecture ${ARCH}"
-            exit 1
-            ;;
     esac
 
-    export PATH="${DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin:${DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/sbin:$PATH"
-
-    echo "Configuring for ${ARCH}..."
-    ${LIBDIR}/configure \
-	--prefix=${BUILDARCHDIR} \
-	--disable-shared \
-	--enable-static \
-	--host=${HOST}
-
-    echo "Building ${LIBNAME} for ${ARCH}..."
-    cd ${LIBDIR}
-    make clean
-    make -j8 V=0
-    make install
-
-    LIBLIST+="${BUILDARCHDIR}/lib/${LIBNAME} "
 done
 
 # Copy headers and generate a single fat library file
-mkdir -p ${DISTLIBDIR}
-${LIPO} -create ${LIBLIST} -output ${DISTLIBDIR}/${LIBNAME}
+mkdir -p #{DISTLIBDIR}
+#{LIPO} -create #{LIBLIST} -output #{DISTLIBDIR}/#{LIBNAME}
 for ARCH in $ARCHS
 do
-    cp -R $BUILDDIR/$ARCH/include ${DISTDIR}
+    cp -R $BUILDDIR/$ARCH/include #{DISTDIR}
     break
 done
 
 # Cleanup
-rm -rf ${BUILDDIR}
+rm -rf #{BUILDDIR}
 =end
