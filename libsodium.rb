@@ -89,10 +89,6 @@ end
 FileUtils.mkdir_p BUILDDIR
 FileUtils.mkdir_p DISTDIR
 
-# Generate autoconf files
-#FileUtils.cd(LIBDIR)
-#exit 1 unless system('./autogen.sh')
-
 PLATFORMS = sdk_versions.keys
 lib_list = []
 # Compile libsodium for each Apple device platform
@@ -114,6 +110,68 @@ for platform in PLATFORMS
       ENV["ISDKROOT"] = isdk_root
       ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} #{OTHER_CFLAGS}"
       ENV["LDFLAGS"]  = "-mthumb -arch #{arch} -isysroot #{isdk_root}"
+    when "armv7s"
+      platform_name   = "iPhoneOS"
+      host            = "#{arch}-apple-darwin"
+      base_dir        = "#{DEVELOPER}/Platforms/#{platform_name}.platform/Developer"
+      ENV["BASEDIR"]  = base_dir
+      isdk_root       = "#{base_dir}/SDKs/#{platform_name}#{IOS_SDK_VERSION}.sdk"
+      ENV["ISDKROOT"] = isdk_root
+      ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} #{OTHER_CFLAGS}"
+      ENV["LDFLAGS"]  = "-mthumb -arch #{arch} -isysroot #{isdk_root}"
+    when "arm64"
+      if platform == "iOS"
+        # iOS
+        platform_name   = "iPhoneOS"
+        host            = "arm-apple-darwin"
+        base_dir        = "#{DEVELOPER}/Platforms/#{platform_name}.platform/Developer"
+        ENV["BASEDIR"]  = base_dir
+        isdk_root       = "#{base_dir}/SDKs/#{platform_name}#{IOS_SDK_VERSION}.sdk"
+        ENV["ISDKROOT"] = isdk_root
+        ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} #{OTHER_CFLAGS}"
+        ENV["LDFLAGS"]  = "-mthumb -arch #{arch} -isysroot #{isdk_root}"
+      else
+        # tvOS
+        platform_name   = "AppleTVOS"
+        host            = "arm-apple-darwin"
+        base_dir        = "#{DEVELOPER}/Platforms/#{platform_name}.platform/Developer"
+        ENV["BASEDIR"]  = base_dir
+        isdk_root       = "#{base_dir}/SDKs/#{platform_name}#{TVOS_SDK_VERSION}.sdk"
+        ENV["ISDKROOT"] = isdk_root
+        ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} #{OTHER_CFLAGS}"
+        ENV["LDFLAGS"]  = "-mthumb -arch #{arch} -isysroot #{isdk_root}"
+        #   tvsos-version-min?
+      end
+    when "i386"
+      platform_name   = "iPhoneSimulator"
+      host            = "#{arch}-apple-darwin"
+      base_dir        = "#{DEVELOPER}/Platforms/#{platform_name}.platform/Developer"
+      ENV["BASEDIR"]  = base_dir
+      isdk_root       = "#{base_dir}/SDKs/#{platform_name}#{IOS_SDK_VERSION}.sdk"
+      ENV["ISDKROOT"] = isdk_root
+      ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} -mios-version-min=#{IOS_SDK_VERSION} #{OTHER_CFLAGS}"
+      ENV["LDFLAGS"]  = "-m32 -arch #{arch}"
+    when "x86_64"
+      platform_name   = "iPhoneSimulator"
+      host            = "#{arch}-apple-darwin"
+      base_dir        = "#{DEVELOPER}/Platforms/#{platform_name}.platform/Developer"
+      ENV["BASEDIR"]  = base_dir
+      isdk_root       = "#{base_dir}/SDKs/#{platform_name}#{IOS_SDK_VERSION}.sdk"
+      ENV["ISDKROOT"] = isdk_root
+      ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} -mios-version-min=#{IOS_SDK_VERSION} #{OTHER_CFLAGS}"
+      ENV["LDFLAGS"]  = "-arch #{arch}"
+      # tvOS
+      #   appletvsimulator10.0
+      #   PLATFORM=AppleTVOS
+      #   appletvos10.0
+      #   PLATFORM=AppleTVSimulator
+      #   tvsos-version-min?
+      # watchOS
+      #   watchos3.0
+      #   watchsimulator3.0
+      #   PLATFORM=WatchOS
+      #   PLATFORM=WatchSimulator
+      #   watchos-version-min?
     else
       warn "Unsupported architecture #{arch}"
       break
@@ -143,70 +201,13 @@ for platform in PLATFORMS
   end
 end
 
-puts lib_list
-
-exit 1
-=begin
-for ARCH in $ARCHS
-do
-    case #{ARCH} in
-        armv7s)
-	    PLATFORM="iPhoneOS"
-	    HOST="#{ARCH}-apple-darwin"
-	    export BASEDIR="#{DEVELOPER}/Platforms/#{PLATFORM}.platform/Developer"
-	    export ISDKROOT="#{BASEDIR}/SDKs/#{PLATFORM}#{IOS_SDK_VERSION}.sdk"
-	    export CFLAGS="-arch #{ARCH} -isysroot #{ISDKROOT} #{OTHER_CFLAGS}"
-	    export LDFLAGS="-mthumb -arch #{ARCH} -isysroot #{ISDKROOT}"
-            ;;
-        arm64)
-	    PLATFORM="iPhoneOS"
-	    HOST="arm-apple-darwin"
-	    export BASEDIR="#{DEVELOPER}/Platforms/#{PLATFORM}.platform/Developer"
-	    export ISDKROOT="#{BASEDIR}/SDKs/#{PLATFORM}#{IOS_SDK_VERSION}.sdk"
-	    export CFLAGS="-arch #{ARCH} -isysroot #{ISDKROOT} #{OTHER_CFLAGS}"
-	    export LDFLAGS="-mthumb -arch #{ARCH} -isysroot #{ISDKROOT}"
-            ;;
-        i386)
-	    PLATFORM="iPhoneSimulator"
-	    HOST="#{ARCH}-apple-darwin"
-	    export BASEDIR="#{DEVELOPER}/Platforms/#{PLATFORM}.platform/Developer"
-	    export ISDKROOT="#{BASEDIR}/SDKs/#{PLATFORM}#{IOS_SDK_VERSION}.sdk"
-	    export CFLAGS="-arch #{ARCH} -isysroot #{ISDKROOT} -miphoneos-version-min=#{IOS_SDK_VERSION} #{OTHER_CFLAGS}"
-	    export LDFLAGS="-m32 -arch #{ARCH}"
-            ;;
-        x86_64)
-	    PLATFORM="iPhoneSimulator"
-	    HOST="#{ARCH}-apple-darwin"
-	    export BASEDIR="#{DEVELOPER}/Platforms/#{PLATFORM}.platform/Developer"
-	    export ISDKROOT="#{BASEDIR}/SDKs/#{PLATFORM}#{IOS_SDK_VERSION}.sdk"
-	    export CFLAGS="-arch #{ARCH} -isysroot #{ISDKROOT} -miphoneos-version-min=#{IOS_SDK_VERSION} #{OTHER_CFLAGS}"
-	    export LDFLAGS="-arch #{ARCH}"
-            ;;
-            # tvOS
-            #   appletvsimulator10.0
-            #   PLATFORM=AppleTVOS
-            #   appletvos10.0
-            #   PLATFORM=AppleTVSimulator
-            #   tvsos-version-min?
-            # watchOS
-            #   watchos3.0
-            #   watchsimulator3.0
-            #   PLATFORM=WatchOS
-            #   PLATFORM=WatchSimulator
-            #   watchos-version-min?
-    esac
-
-done
-
 # Copy headers and generate a single fat library file
-mkdir -p #{DISTLIBDIR}
-#{LIPO} -create #{LIBLIST} -output #{DISTLIBDIR}/#{LIBNAME}
-for ARCH in $ARCHS
-do
-    cp -R $BUILDDIR/$ARCH/include #{DISTDIR}
+FileUtils.mkdir_p DISTLIBDIR
+exit 1 unless system("#{LIPO} -create #{lib_list.join(" ")} -output #{DISTLIBDIR}/#{LIBNAME}")
+for arch in VALID_ARHS_PER_PLATFORM["iOS"]
+    FileUtils.cp_r("#{BUILDDIR}/#{arch}/include", DISTDIR)
     break
-done
+end
 
 # Cleanup
-rm -rf #{BUILDDIR}
-=end
+FileUtils.rm_rf BUILDDIR
