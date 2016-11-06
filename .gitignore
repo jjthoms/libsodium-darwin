@@ -2,3 +2,4 @@
 libsodium/*
 libsodium_dist
 libsodium_build
+.DS_Store
