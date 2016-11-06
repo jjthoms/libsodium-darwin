@@ -37,6 +37,9 @@ DISTLIBDIR="${DISTDIR}/lib"
 IOS_SDK_VERSION=$(xcodebuild -showsdks \
     | grep iphoneos | sort | tail -n 1 | awk '{print substr($NF, 9)}'
     )
+MACOS_SDK_VERSION=$(xcodebuild -showsdks \
+    | grep macos | sort | tail -n 1 | awk '{print substr($NF, 7)}'
+    )
 WATCHOS_SDK_VERSION=$(xcodebuild -showsdks \
     | grep watchos | sort | tail -n 1 | awk '{print substr($NF, 8)}'
     )
@@ -44,6 +47,7 @@ TVOS_SDK_VERSION=$(xcodebuild -showsdks \
     | grep appletvos | sort | tail -n 1 | awk '{print substr($NF, 10)}'
     )
 echo "iOS     SDK version = ${IOS_SDK_VERSION}"
+echo "macOS   SDK version = ${MACOS_SDK_VERSION}"
 echo "watchOS SDK version = ${WATCHOS_SDK_VERSION}"
 echo "tvOS    SDK version = ${TVOS_SDK_VERSION}"
 
