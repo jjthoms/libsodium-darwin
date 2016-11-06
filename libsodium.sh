@@ -34,9 +34,18 @@ DISTDIR="${DSTDIR}/libsodium_dist"
 DISTLIBDIR="${DISTDIR}/lib"
 # http://libwebp.webm.googlecode.com/git/iosbuild.sh
 # Extract the latest SDK version from the final field of the form: iphoneosX.Y
-SDK=$(xcodebuild -showsdks \
+IOS_SDK_VERSION=$(xcodebuild -showsdks \
     | grep iphoneos | sort | tail -n 1 | awk '{print substr($NF, 9)}'
     )
+WATCHOS_SDK_VERSION=$(xcodebuild -showsdks \
+    | grep watchos | sort | tail -n 1 | awk '{print substr($NF, 8)}'
+    )
+TVOS_SDK_VERSION=$(xcodebuild -showsdks \
+    | grep appletvos | sort | tail -n 1 | awk '{print substr($NF, 10)}'
+    )
+echo "iOS     SDK version = ${IOS_SDK_VERSION}"
+echo "watchOS SDK version = ${WATCHOS_SDK_VERSION}"
+echo "tvOS    SDK version = ${TVOS_SDK_VERSION}"
 
 OTHER_CFLAGS="-Os -Qunused-arguments"
 
@@ -65,7 +74,7 @@ do
 	    PLATFORM="iPhoneOS"
 	    HOST="${ARCH}-apple-darwin"
 	    export BASEDIR="${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer"
-	    export ISDKROOT="${BASEDIR}/SDKs/${PLATFORM}${SDK}.sdk"
+	    export ISDKROOT="${BASEDIR}/SDKs/${PLATFORM}${IOS_SDK_VERSION}.sdk"
 	    export CFLAGS="-arch ${ARCH} -isysroot ${ISDKROOT} ${OTHER_CFLAGS}"
 	    export LDFLAGS="-mthumb -arch ${ARCH} -isysroot ${ISDKROOT}"
             ;;
@@ -73,7 +82,7 @@ do
 	    PLATFORM="iPhoneOS"
 	    HOST="${ARCH}-apple-darwin"
 	    export BASEDIR="${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer"
-	    export ISDKROOT="${BASEDIR}/SDKs/${PLATFORM}${SDK}.sdk"
+	    export ISDKROOT="${BASEDIR}/SDKs/${PLATFORM}${IOS_SDK_VERSION}.sdk"
 	    export CFLAGS="-arch ${ARCH} -isysroot ${ISDKROOT} ${OTHER_CFLAGS}"
 	    export LDFLAGS="-mthumb -arch ${ARCH} -isysroot ${ISDKROOT}"
             ;;
@@ -81,7 +90,7 @@ do
 	    PLATFORM="iPhoneOS"
 	    HOST="arm-apple-darwin"
 	    export BASEDIR="${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer"
-	    export ISDKROOT="${BASEDIR}/SDKs/${PLATFORM}${SDK}.sdk"
+	    export ISDKROOT="${BASEDIR}/SDKs/${PLATFORM}${IOS_SDK_VERSION}.sdk"
 	    export CFLAGS="-arch ${ARCH} -isysroot ${ISDKROOT} ${OTHER_CFLAGS}"
 	    export LDFLAGS="-mthumb -arch ${ARCH} -isysroot ${ISDKROOT}"
             ;;
@@ -89,18 +98,28 @@ do
 	    PLATFORM="iPhoneSimulator"
 	    HOST="${ARCH}-apple-darwin"
 	    export BASEDIR="${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer"
-	    export ISDKROOT="${BASEDIR}/SDKs/${PLATFORM}${SDK}.sdk"
-	    export CFLAGS="-arch ${ARCH} -isysroot ${ISDKROOT} -miphoneos-version-min=${SDK} ${OTHER_CFLAGS}"
+	    export ISDKROOT="${BASEDIR}/SDKs/${PLATFORM}${IOS_SDK_VERSION}.sdk"
+	    export CFLAGS="-arch ${ARCH} -isysroot ${ISDKROOT} -miphoneos-version-min=${IOS_SDK_VERSION} ${OTHER_CFLAGS}"
 	    export LDFLAGS="-m32 -arch ${ARCH}"
             ;;
         x86_64)
 	    PLATFORM="iPhoneSimulator"
 	    HOST="${ARCH}-apple-darwin"
 	    export BASEDIR="${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer"
-	    export ISDKROOT="${BASEDIR}/SDKs/${PLATFORM}${SDK}.sdk"
-	    export CFLAGS="-arch ${ARCH} -isysroot ${ISDKROOT} -miphoneos-version-min=${SDK} ${OTHER_CFLAGS}"
+	    export ISDKROOT="${BASEDIR}/SDKs/${PLATFORM}${IOS_SDK_VERSION}.sdk"
+	    export CFLAGS="-arch ${ARCH} -isysroot ${ISDKROOT} -miphoneos-version-min=${IOS_SDK_VERSION} ${OTHER_CFLAGS}"
 	    export LDFLAGS="-arch ${ARCH}"
             ;;
+            # tvOS
+            #   appletvsimulator10.0
+            #   PLATFORM=AppleTVOS
+            #   appletvos10.0
+            #   PLATFORM=AppleTVSimulator
+            # watchOS
+            #   watchos3.0
+            #   watchsimulator3.0
+            #   PLATFORM=WatchOS
+            #   PLATFORM=WatchSimulator
         *)
             echo "Unsupported architecture ${ARCH}"
             exit 1
