@@ -5,8 +5,7 @@
 # Adapted from https://github.com/drewcrawford/libsodium-ios/blob/master/libsodium.sh
 #
 
-require 'FileUtils'
-require 'open-uri'
+require 'fileutils'
 
 #
 # libsodium release version
