@@ -51,8 +51,8 @@ LIBNAME                 = "libsodium.a"
 VALID_ARHS_PER_PLATFORM = {
   "iOS"     => ["armv7", "armv7s", "arm64", "i386", "x86_64"],
   "macOS"   => ["x86_64"],
-  "tvOS"    => ["arm64","i386", "x86_64"],
-  "watchOS" => ["armv7k","i386", "x86_64"],
+  "tvOS"    => ["arm64", "x86_64"],
+  "watchOS" => ["armv7k", "i386"],
 }
 DEVELOPER               = `xcode-select -print-path`.chomp
 LIPO                    = `xcrun -sdk iphoneos -find lipo`.chomp
@@ -144,7 +144,7 @@ for platform in PLATFORMS
       ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} #{OTHER_CFLAGS}"
       ENV["LDFLAGS"]  = "-mthumb -arch #{arch} -isysroot #{isdk_root}"
     when "tvOS-arm64"
-      # tvOS 64-bit ARM (Apple TV)
+      # tvOS 64-bit ARM (Apple TV 4)
       platform_name   = "AppleTVOS"
       host            = "arm-apple-darwin"
       base_dir        = "#{DEVELOPER}/Platforms/#{platform_name}.platform/Developer"
@@ -155,7 +155,7 @@ for platform in PLATFORMS
       ENV["LDFLAGS"]  = "-mthumb -arch #{arch} -isysroot #{isdk_root}"
         #   tvsos-version-min?
     when "iOS-i386"
-      # iOS 32-bit simulator (some older iPhones)
+      # iOS 32-bit simulator (iOS 6.1 and below)
       platform_name   = "iPhoneSimulator"
       host            = "#{arch}-apple-darwin"
       base_dir        = "#{DEVELOPER}/Platforms/#{platform_name}.platform/Developer"
@@ -164,18 +164,8 @@ for platform in PLATFORMS
       ENV["ISDKROOT"] = isdk_root
       ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} -mios-version-min=#{IOS_SDK_VERSION} #{OTHER_CFLAGS}"
       ENV["LDFLAGS"]  = "-m32 -arch #{arch}"
-    when "tvOS-i386"
-      # tvOS 32-bit simulator
-      platform_name   = "AppleTVSimulator"
-      host            = "#{arch}-apple-darwin"
-      base_dir        = "#{DEVELOPER}/Platforms/#{platform_name}.platform/Developer"
-      ENV["BASEDIR"]  = base_dir
-      isdk_root       = "#{base_dir}/SDKs/#{platform_name}#{TVOS_SDK_VERSION}.sdk"
-      ENV["ISDKROOT"] = isdk_root
-      ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} -mtvos-version-min=#{TVOS_SDK_VERSION} #{OTHER_CFLAGS}"
-      ENV["LDFLAGS"]  = "-m32 -arch #{arch}"
     when "watchOS-i386"
-      # tvOS 32-bit simulator
+      # watchOS 32-bit simulator
       platform_name   = "WatchSimulator"
       host            = "#{arch}-apple-darwin"
       base_dir        = "#{DEVELOPER}/Platforms/#{platform_name}.platform/Developer"
@@ -185,7 +175,7 @@ for platform in PLATFORMS
       ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} -mwatchos-version-min=#{WATCHOS_SDK_VERSION} #{OTHER_CFLAGS}"
       ENV["LDFLAGS"]  = "-m32 -arch #{arch}"
     when "iOS-x86_64"
-      # iOS 64-bit simulator (iPhone, iPad)
+      # iOS 64-bit simulator (iOS 7+)
       platform_name   = "iPhoneSimulator"
       host            = "#{arch}-apple-darwin"
       base_dir        = "#{DEVELOPER}/Platforms/#{platform_name}.platform/Developer"
@@ -204,29 +194,6 @@ for platform in PLATFORMS
       ENV["ISDKROOT"] = isdk_root
       ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} -mtvos-version-min=#{TVOS_SDK_VERSION} #{OTHER_CFLAGS}"
       ENV["LDFLAGS"]  = "-arch #{arch}"
-    when "watchOS-x86_64"
-      # watchOS 64-bit simulator
-      platform_name   = "WatchSimulator"
-      host            = "#{arch}-apple-darwin"
-      base_dir        = "#{DEVELOPER}/Platforms/#{platform_name}.platform/Developer"
-      ENV["BASEDIR"]  = base_dir
-      isdk_root       = "#{base_dir}/SDKs/#{platform_name}#{WATCHOS_SDK_VERSION}.sdk"
-      ENV["ISDKROOT"] = isdk_root
-      ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} -mwatchos-version-min=#{WATCHOS_SDK_VERSION} #{OTHER_CFLAGS}"
-      ENV["LDFLAGS"]  = "-arch #{arch}"
-      # tvOS 32-bit simulator
-      # tvOS
-      #   appletvsimulator10.0
-      #   PLATFORM=AppleTVOS
-      #   appletvos10.0
-      #   PLATFORM=AppleTVSimulator
-      #   tvsos-version-min?
-      # watchOS
-      #   watchos3.0
-      #   watchsimulator3.0
-      #   PLATFORM=WatchOS
-      #   PLATFORM=WatchSimulator
-      #   watchos-version-min?
     else
       warn "Unsupported platform/architecture #{build_type}"
       next
