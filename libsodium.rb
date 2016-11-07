@@ -7,6 +7,11 @@
 
 require 'fileutils'
 
+if /darwin/ !~ RUBY_PLATFORM
+  puts "This script needs macOS to run"
+  exit 1
+end
+
 #
 # libsodium release version
 # Please visit https://github.com/jedisct1/libsodium/releases
