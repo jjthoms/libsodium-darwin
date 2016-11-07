@@ -123,6 +123,16 @@ for platform in PLATFORMS
       ENV["ISDKROOT"] = isdk_root
       ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} #{OTHER_CFLAGS}"
       ENV["LDFLAGS"]  = "-mthumb -arch #{arch} -isysroot #{isdk_root}"
+    when "watchOS-armv7k"
+      # watchOS 32-bit ARM
+      platform_name   = "WatchOS"
+      host            = "#{arch}-apple-darwin"
+      base_dir        = "#{DEVELOPER}/Platforms/#{platform_name}.platform/Developer"
+      ENV["BASEDIR"]  = base_dir
+      isdk_root       = "#{base_dir}/SDKs/#{platform_name}#{WATCHOS_SDK_VERSION}.sdk"
+      ENV["ISDKROOT"] = isdk_root
+      ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} #{OTHER_CFLAGS}"
+      ENV["LDFLAGS"]  = "-mthumb -arch #{arch} -isysroot #{isdk_root}"
     when "iOS-arm64"
       # iOS 64-bit ARM (iPhone 5s and later)
       platform_name   = "iPhoneOS"
@@ -154,6 +164,26 @@ for platform in PLATFORMS
       ENV["ISDKROOT"] = isdk_root
       ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} -mios-version-min=#{IOS_SDK_VERSION} #{OTHER_CFLAGS}"
       ENV["LDFLAGS"]  = "-m32 -arch #{arch}"
+    when "tvOS-i386"
+      # tvOS 32-bit simulator
+      platform_name   = "AppleTVSimulator"
+      host            = "#{arch}-apple-darwin"
+      base_dir        = "#{DEVELOPER}/Platforms/#{platform_name}.platform/Developer"
+      ENV["BASEDIR"]  = base_dir
+      isdk_root       = "#{base_dir}/SDKs/#{platform_name}#{TVOS_SDK_VERSION}.sdk"
+      ENV["ISDKROOT"] = isdk_root
+      ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} -mtvos-version-min=#{TVOS_SDK_VERSION} #{OTHER_CFLAGS}"
+      ENV["LDFLAGS"]  = "-m32 -arch #{arch}"
+    when "watchOS-i386"
+      # tvOS 32-bit simulator
+      platform_name   = "WatchSimulator"
+      host            = "#{arch}-apple-darwin"
+      base_dir        = "#{DEVELOPER}/Platforms/#{platform_name}.platform/Developer"
+      ENV["BASEDIR"]  = base_dir
+      isdk_root       = "#{base_dir}/SDKs/#{platform_name}#{WATCHOS_SDK_VERSION}.sdk"
+      ENV["ISDKROOT"] = isdk_root
+      ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} -mwatchos-version-min=#{WATCHOS_SDK_VERSION} #{OTHER_CFLAGS}"
+      ENV["LDFLAGS"]  = "-m32 -arch #{arch}"
     when "iOS-x86_64"
       # iOS 64-bit simulator (iPhone, iPad)
       platform_name   = "iPhoneSimulator"
@@ -164,6 +194,27 @@ for platform in PLATFORMS
       ENV["ISDKROOT"] = isdk_root
       ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} -mios-version-min=#{IOS_SDK_VERSION} #{OTHER_CFLAGS}"
       ENV["LDFLAGS"]  = "-arch #{arch}"
+    when "tvOS-x86_64"
+      # tvOS 64-bit simulator
+      platform_name   = "AppleTVSimulator"
+      host            = "#{arch}-apple-darwin"
+      base_dir        = "#{DEVELOPER}/Platforms/#{platform_name}.platform/Developer"
+      ENV["BASEDIR"]  = base_dir
+      isdk_root       = "#{base_dir}/SDKs/#{platform_name}#{TVOS_SDK_VERSION}.sdk"
+      ENV["ISDKROOT"] = isdk_root
+      ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} -mtvos-version-min=#{TVOS_SDK_VERSION} #{OTHER_CFLAGS}"
+      ENV["LDFLAGS"]  = "-arch #{arch}"
+    when "watchOS-x86_64"
+      # watchOS 64-bit simulator
+      platform_name   = "WatchSimulator"
+      host            = "#{arch}-apple-darwin"
+      base_dir        = "#{DEVELOPER}/Platforms/#{platform_name}.platform/Developer"
+      ENV["BASEDIR"]  = base_dir
+      isdk_root       = "#{base_dir}/SDKs/#{platform_name}#{WATCHOS_SDK_VERSION}.sdk"
+      ENV["ISDKROOT"] = isdk_root
+      ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} -mwatchos-version-min=#{WATCHOS_SDK_VERSION} #{OTHER_CFLAGS}"
+      ENV["LDFLAGS"]  = "-arch #{arch}"
+      # tvOS 32-bit simulator
       # tvOS
       #   appletvsimulator10.0
       #   PLATFORM=AppleTVOS
