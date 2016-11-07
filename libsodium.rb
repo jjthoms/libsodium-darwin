@@ -101,8 +101,10 @@ for platform in PLATFORMS
     build_arch_dir=File.absolute_path("#{BUILDDIR}/#{platform}-#{arch}")
     FileUtils.mkdir_p(build_arch_dir)
 
-    case arch
-    when "armv7"
+    build_type = "#{platform}-#{arch}"
+    case build_type
+    when "iOS-armv7"
+      # iOS 32-bit ARM (till iPhone 4s)
       platform_name   = "iPhoneOS"
       host            = "#{arch}-apple-darwin"
       base_dir        = "#{DEVELOPER}/Platforms/#{platform_name}.platform/Developer"
@@ -111,7 +113,8 @@ for platform in PLATFORMS
       ENV["ISDKROOT"] = isdk_root
       ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} #{OTHER_CFLAGS}"
       ENV["LDFLAGS"]  = "-mthumb -arch #{arch} -isysroot #{isdk_root}"
-    when "armv7s"
+    when "iOS-armv7s"
+      # iOS 32-bit ARM (iPhone 5 till iPhone 5c)
       platform_name   = "iPhoneOS"
       host            = "#{arch}-apple-darwin"
       base_dir        = "#{DEVELOPER}/Platforms/#{platform_name}.platform/Developer"
@@ -120,34 +123,29 @@ for platform in PLATFORMS
       ENV["ISDKROOT"] = isdk_root
       ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} #{OTHER_CFLAGS}"
       ENV["LDFLAGS"]  = "-mthumb -arch #{arch} -isysroot #{isdk_root}"
-    when "arm64"
-      case platform
-      when "iOS"
-        # iOS
-        platform_name   = "iPhoneOS"
-        host            = "arm-apple-darwin"
-        base_dir        = "#{DEVELOPER}/Platforms/#{platform_name}.platform/Developer"
-        ENV["BASEDIR"]  = base_dir
-        isdk_root       = "#{base_dir}/SDKs/#{platform_name}#{IOS_SDK_VERSION}.sdk"
-        ENV["ISDKROOT"] = isdk_root
-        ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} #{OTHER_CFLAGS}"
-        ENV["LDFLAGS"]  = "-mthumb -arch #{arch} -isysroot #{isdk_root}"
-      when "tvOS"
-        # tvOS
-        platform_name   = "AppleTVOS"
-        host            = "arm-apple-darwin"
-        base_dir        = "#{DEVELOPER}/Platforms/#{platform_name}.platform/Developer"
-        ENV["BASEDIR"]  = base_dir
-        isdk_root       = "#{base_dir}/SDKs/#{platform_name}#{TVOS_SDK_VERSION}.sdk"
-        ENV["ISDKROOT"] = isdk_root
-        ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} #{OTHER_CFLAGS}"
-        ENV["LDFLAGS"]  = "-mthumb -arch #{arch} -isysroot #{isdk_root}"
+    when "iOS-arm64"
+      # iOS 64-bit ARM (iPhone 5s and later)
+      platform_name   = "iPhoneOS"
+      host            = "arm-apple-darwin"
+      base_dir        = "#{DEVELOPER}/Platforms/#{platform_name}.platform/Developer"
+      ENV["BASEDIR"]  = base_dir
+      isdk_root       = "#{base_dir}/SDKs/#{platform_name}#{IOS_SDK_VERSION}.sdk"
+      ENV["ISDKROOT"] = isdk_root
+      ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} #{OTHER_CFLAGS}"
+      ENV["LDFLAGS"]  = "-mthumb -arch #{arch} -isysroot #{isdk_root}"
+    when "tvOS-arm64"
+      # tvOS 64-bit ARM (Apple TV)
+      platform_name   = "AppleTVOS"
+      host            = "arm-apple-darwin"
+      base_dir        = "#{DEVELOPER}/Platforms/#{platform_name}.platform/Developer"
+      ENV["BASEDIR"]  = base_dir
+      isdk_root       = "#{base_dir}/SDKs/#{platform_name}#{TVOS_SDK_VERSION}.sdk"
+      ENV["ISDKROOT"] = isdk_root
+      ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} #{OTHER_CFLAGS}"
+      ENV["LDFLAGS"]  = "-mthumb -arch #{arch} -isysroot #{isdk_root}"
         #   tvsos-version-min?
-      else
-        warn "Bad build combination"
-        exit 1
-      end
-    when "i386"
+    when "iOS-i386"
+      # iOS 32-bit simulator (some older iPhones)
       platform_name   = "iPhoneSimulator"
       host            = "#{arch}-apple-darwin"
       base_dir        = "#{DEVELOPER}/Platforms/#{platform_name}.platform/Developer"
@@ -156,7 +154,8 @@ for platform in PLATFORMS
       ENV["ISDKROOT"] = isdk_root
       ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} -mios-version-min=#{IOS_SDK_VERSION} #{OTHER_CFLAGS}"
       ENV["LDFLAGS"]  = "-m32 -arch #{arch}"
-    when "x86_64"
+    when "iOS-x86_64"
+      # iOS 64-bit simulator (iPhone, iPad)
       platform_name   = "iPhoneSimulator"
       host            = "#{arch}-apple-darwin"
       base_dir        = "#{DEVELOPER}/Platforms/#{platform_name}.platform/Developer"
@@ -178,7 +177,7 @@ for platform in PLATFORMS
       #   PLATFORM=WatchSimulator
       #   watchos-version-min?
     else
-      warn "Unsupported architecture #{arch}"
+      warn "Unsupported platform/architecture #{build_type}"
       next
       #exit 1
     end
