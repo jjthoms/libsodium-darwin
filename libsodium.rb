@@ -179,7 +179,7 @@ for platform in PLATFORMS
       #   watchos-version-min?
     else
       warn "Unsupported architecture #{arch}"
-      break
+      next
       #exit 1
     end
 
