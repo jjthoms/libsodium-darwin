@@ -200,6 +200,7 @@ for platform in PLATFORMS
       #exit 1
     end
 
+    # Modify path to include Xcode toolchain path
     ENV["PATH"] = "#{DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin:" +
       "#{DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/sbin:#{ENV["PATH"]}"
 
