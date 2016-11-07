@@ -44,8 +44,16 @@ def find_sdks
   return sdk_versions
 end
 
+# libsodium release version
 PKG_VER                 = "1.0.11"
+
 download_and_extract_libsodium()
+
+# Minimum platform versions
+IOS_VERSION_MIN         = 9.0
+MACOS_VERSION_MIN       = 10.11
+TVOS_VERSION_MIN        = 9.0
+WATCHOS_VERSION_MIN     = 2.0
 
 LIBNAME                 = "libsodium.a"
 VALID_ARHS_PER_PLATFORM = {
@@ -111,7 +119,7 @@ for platform in PLATFORMS
       ENV["BASEDIR"]  = base_dir
       isdk_root       = "#{base_dir}/SDKs/#{platform_name}#{IOS_SDK_VERSION}.sdk"
       ENV["ISDKROOT"] = isdk_root
-      ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} #{OTHER_CFLAGS}"
+      ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} -mios-version-min=#{IOS_VERSION_MIN} #{OTHER_CFLAGS}"
       ENV["LDFLAGS"]  = "-mthumb -arch #{arch} -isysroot #{isdk_root}"
     when "iOS-armv7s"
       # iOS 32-bit ARM (iPhone 5 till iPhone 5c)
@@ -121,7 +129,7 @@ for platform in PLATFORMS
       ENV["BASEDIR"]  = base_dir
       isdk_root       = "#{base_dir}/SDKs/#{platform_name}#{IOS_SDK_VERSION}.sdk"
       ENV["ISDKROOT"] = isdk_root
-      ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} #{OTHER_CFLAGS}"
+      ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} -mios-version-min=#{IOS_VERSION_MIN} #{OTHER_CFLAGS}"
       ENV["LDFLAGS"]  = "-mthumb -arch #{arch} -isysroot #{isdk_root}"
     when "watchOS-armv7k"
       # watchOS 32-bit ARM
@@ -131,7 +139,7 @@ for platform in PLATFORMS
       ENV["BASEDIR"]  = base_dir
       isdk_root       = "#{base_dir}/SDKs/#{platform_name}#{WATCHOS_SDK_VERSION}.sdk"
       ENV["ISDKROOT"] = isdk_root
-      ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} #{OTHER_CFLAGS}"
+      ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} -mwatchos-version-min=#{WATCHOS_VERSION_MIN} #{OTHER_CFLAGS}"
       ENV["LDFLAGS"]  = "-mthumb -arch #{arch} -isysroot #{isdk_root}"
     when "iOS-arm64"
       # iOS 64-bit ARM (iPhone 5s and later)
@@ -141,7 +149,7 @@ for platform in PLATFORMS
       ENV["BASEDIR"]  = base_dir
       isdk_root       = "#{base_dir}/SDKs/#{platform_name}#{IOS_SDK_VERSION}.sdk"
       ENV["ISDKROOT"] = isdk_root
-      ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} #{OTHER_CFLAGS}"
+      ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root}  -mios-version-min=#{IOS_VERSION_MIN} #{OTHER_CFLAGS}"
       ENV["LDFLAGS"]  = "-mthumb -arch #{arch} -isysroot #{isdk_root}"
     when "tvOS-arm64"
       # tvOS 64-bit ARM (Apple TV 4)
@@ -151,7 +159,7 @@ for platform in PLATFORMS
       ENV["BASEDIR"]  = base_dir
       isdk_root       = "#{base_dir}/SDKs/#{platform_name}#{TVOS_SDK_VERSION}.sdk"
       ENV["ISDKROOT"] = isdk_root
-      ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} #{OTHER_CFLAGS}"
+      ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} -mtvos-version-min=#{TVOS_VERSION_MIN} #{OTHER_CFLAGS}"
       ENV["LDFLAGS"]  = "-mthumb -arch #{arch} -isysroot #{isdk_root}"
         #   tvsos-version-min?
     when "iOS-i386"
@@ -162,7 +170,17 @@ for platform in PLATFORMS
       ENV["BASEDIR"]  = base_dir
       isdk_root       = "#{base_dir}/SDKs/#{platform_name}#{IOS_SDK_VERSION}.sdk"
       ENV["ISDKROOT"] = isdk_root
-      ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} -mios-version-min=#{IOS_SDK_VERSION} #{OTHER_CFLAGS}"
+      ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} -mios-version-min=#{IOS_VERSION_MIN} #{OTHER_CFLAGS}"
+      ENV["LDFLAGS"]  = "-m32 -arch #{arch}"
+    when "macOS-i386"
+      # macOS 32-bit
+      platform_name   = "MacOSX"
+      host            = "#{arch}-apple-darwin"
+      base_dir        = "#{DEVELOPER}/Platforms/#{platform_name}.platform/Developer"
+      ENV["BASEDIR"]  = base_dir
+      isdk_root       = "#{base_dir}/SDKs/#{platform_name}#{MACOS_SDK_VERSION}.sdk"
+      ENV["ISDKROOT"] = isdk_root
+      ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} -mmacosx-version-min=#{MACOS_VERSION_MIN} #{OTHER_CFLAGS}"
       ENV["LDFLAGS"]  = "-m32 -arch #{arch}"
     when "watchOS-i386"
       # watchOS 32-bit simulator
@@ -172,7 +190,7 @@ for platform in PLATFORMS
       ENV["BASEDIR"]  = base_dir
       isdk_root       = "#{base_dir}/SDKs/#{platform_name}#{WATCHOS_SDK_VERSION}.sdk"
       ENV["ISDKROOT"] = isdk_root
-      ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} -mwatchos-version-min=#{WATCHOS_SDK_VERSION} #{OTHER_CFLAGS}"
+      ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} -mwatchos-version-min=#{WATCHOS_VERSION_MIN} #{OTHER_CFLAGS}"
       ENV["LDFLAGS"]  = "-m32 -arch #{arch}"
     when "iOS-x86_64"
       # iOS 64-bit simulator (iOS 7+)
@@ -182,7 +200,17 @@ for platform in PLATFORMS
       ENV["BASEDIR"]  = base_dir
       isdk_root       = "#{base_dir}/SDKs/#{platform_name}#{IOS_SDK_VERSION}.sdk"
       ENV["ISDKROOT"] = isdk_root
-      ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} -mios-version-min=#{IOS_SDK_VERSION} #{OTHER_CFLAGS}"
+      ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} -mios-version-min=#{IOS_VERSION_MIN} #{OTHER_CFLAGS}"
+      ENV["LDFLAGS"]  = "-arch #{arch}"
+    when "macOS-x86_64"
+      # macOS 64-bit
+      platform_name   = "MacOSX"
+      host            = "#{arch}-apple-darwin"
+      base_dir        = "#{DEVELOPER}/Platforms/#{platform_name}.platform/Developer"
+      ENV["BASEDIR"]  = base_dir
+      isdk_root       = "#{base_dir}/SDKs/#{platform_name}#{MACOS_SDK_VERSION}.sdk"
+      ENV["ISDKROOT"] = isdk_root
+      ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} -mmacosx-version-min=#{MACOS_VERSION_MIN} #{OTHER_CFLAGS}"
       ENV["LDFLAGS"]  = "-arch #{arch}"
     when "tvOS-x86_64"
       # tvOS 64-bit simulator
@@ -192,7 +220,7 @@ for platform in PLATFORMS
       ENV["BASEDIR"]  = base_dir
       isdk_root       = "#{base_dir}/SDKs/#{platform_name}#{TVOS_SDK_VERSION}.sdk"
       ENV["ISDKROOT"] = isdk_root
-      ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} -mtvos-version-min=#{TVOS_SDK_VERSION} #{OTHER_CFLAGS}"
+      ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} -mtvos-version-min=#{TVOS_VERSION_MIN} #{OTHER_CFLAGS}"
       ENV["LDFLAGS"]  = "-arch #{arch}"
     else
       warn "Unsupported platform/architecture #{build_type}"
