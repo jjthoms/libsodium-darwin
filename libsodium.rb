@@ -90,7 +90,8 @@ FileUtils.mkdir_p BUILDDIR
 FileUtils.mkdir_p DISTDIR
 
 PLATFORMS = sdk_versions.keys
-lib_list = []
+libs_per_platform = {}
+
 # Compile libsodium for each Apple device platform
 for platform in PLATFORMS
   # Compile libsodium for each valid Apple device architecture
@@ -120,7 +121,8 @@ for platform in PLATFORMS
       ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} #{OTHER_CFLAGS}"
       ENV["LDFLAGS"]  = "-mthumb -arch #{arch} -isysroot #{isdk_root}"
     when "arm64"
-      if platform == "iOS"
+      case platform
+      when "iOS"
         # iOS
         platform_name   = "iPhoneOS"
         host            = "arm-apple-darwin"
@@ -130,7 +132,7 @@ for platform in PLATFORMS
         ENV["ISDKROOT"] = isdk_root
         ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} #{OTHER_CFLAGS}"
         ENV["LDFLAGS"]  = "-mthumb -arch #{arch} -isysroot #{isdk_root}"
-      else
+      when "tvOS"
         # tvOS
         platform_name   = "AppleTVOS"
         host            = "arm-apple-darwin"
@@ -141,6 +143,9 @@ for platform in PLATFORMS
         ENV["CFLAGS"]   = "-arch #{arch} -isysroot #{isdk_root} #{OTHER_CFLAGS}"
         ENV["LDFLAGS"]  = "-mthumb -arch #{arch} -isysroot #{isdk_root}"
         #   tvsos-version-min?
+      else
+        warn "Bad build combination"
+        exit 1
       end
     when "i386"
       platform_name   = "iPhoneSimulator"
@@ -197,16 +202,44 @@ for platform in PLATFORMS
     exit 1 unless system("make -j8 V=0")
     exit 1 unless system("make install")
 
-    lib_list.push "#{build_arch_dir}/lib/#{LIBNAME}"
+    # Add to the architecture-dependent library list for the current platform
+    libs = libs_per_platform[platform]
+    if libs == nil
+      libs_per_platform[platform] = libs = []
+    end
+    libs.push "#{build_arch_dir}/lib/#{LIBNAME}"
   end
 end
 
-# Copy headers and generate a single fat library file
+# Build a single universal (fat) library file for each platform
 FileUtils.mkdir_p DISTLIBDIR
-exit 1 unless system("#{LIPO} -create #{lib_list.join(" ")} -output #{DISTLIBDIR}/#{LIBNAME}")
-for arch in VALID_ARHS_PER_PLATFORM["iOS"]
-    FileUtils.cp_r("#{BUILDDIR}/#{arch}/include", DISTDIR)
-    break
+for platform in PLATFORMS
+  # Find libraries for platform
+  lib_name = "libsodium-#{platform}.a"
+  libs     = libs_per_platform[platform]
+
+  # Make sure library list is not empty
+  if libs == nil || libs.length == 0
+    warn "Nothing to do for #{lib_name}"
+    next
+  end
+
+  # Build universal library file (aka fat binary)
+  lipo_cmd = "#{LIPO} -create #{libs.join(" ")} -output #{DISTLIBDIR}/#{lib_name}"
+  puts "Combining #{libs.length} libraries into #{lib_name}..."
+  exit 1 unless system(lipo_cmd)
+
+end
+
+# Copy headers once (they are the same since we're using make install)
+for platform in PLATFORMS
+  for arch in VALID_ARHS_PER_PLATFORM["iOS"]
+      include_dir = "#{BUILDDIR}/#{platform}-#{arch}/include"
+      if File.directory? include_dir
+        FileUtils.cp_r(include_dir, DISTDIR)
+        break
+      end
+  end
 end
 
 # Cleanup
