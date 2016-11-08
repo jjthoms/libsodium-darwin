@@ -20,15 +20,13 @@ end
 # Download and extract the latest stable release indicated by PKG_VER variable
 def download_and_extract_libsodium()
   puts "Downloading latest stable release of 'libsodium'"
-  libsodium_dir = "libsodium"
-  FileUtils.rm_rf libsodium_dir
+  libsodium_dir = "build/libsodium"
   pkg_name      = "libsodium-#{PKG_VER}"
   pkg           = "#{pkg_name}.tar.gz"
   url           = "https://github.com/jedisct1/libsodium/releases/download/#{PKG_VER}/#{pkg}"
   exit 1 unless system("curl -O -L #{url}")
   exit 1 unless system("tar xzf #{pkg}")
   FileUtils.mv pkg_name, libsodium_dir
-  FileUtils.rm_rf pkg
 end
 
 def find_sdks
@@ -51,8 +49,6 @@ end
 # libsodium release version
 PKG_VER                 = "1.0.11"
 
-download_and_extract_libsodium()
-
 # Minimum platform versions
 IOS_VERSION_MIN         = 9.0
 MACOS_VERSION_MIN       = 10.11
@@ -71,11 +67,11 @@ LIPO                    = `xcrun -sdk iphoneos -find lipo`.chomp
 # Script's directory
 SCRIPTDIR               = File.absolute_path(File.dirname(__FILE__))
 # libsodium root directory
-LIBDIR                  = File.join(SCRIPTDIR, "libsodium")
+LIBDIR                  = File.join(SCRIPTDIR, "build/libsodium")
 # Destination directory for build and install
 DSTDIR                  = SCRIPTDIR
-BUILDDIR                = "#{DSTDIR}/libsodium_build"
-DISTDIR                 = "#{DSTDIR}/libsodium_dist"
+BUILDDIR                = "#{DSTDIR}/build"
+DISTDIR                 = "#{DSTDIR}/dist"
 DISTLIBDIR              = "#{DISTDIR}/lib"
 
 sdk_versions            = find_sdks()
@@ -100,6 +96,9 @@ if File.directory? DISTDIR
 end
 FileUtils.mkdir_p BUILDDIR
 FileUtils.mkdir_p DISTDIR
+
+# Download/extract libsodium into build folder
+download_and_extract_libsodium()
 
 PLATFORMS = sdk_versions.keys
 libs_per_platform = {}

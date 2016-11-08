@@ -1,5 +1,4 @@
 *xcuserdata*
-libsodium/*
-libsodium_dist
-libsodium_build
+dist
+build
 .DS_Store
