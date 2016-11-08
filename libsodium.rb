@@ -20,13 +20,13 @@ end
 # Download and extract the latest stable release indicated by PKG_VER variable
 def download_and_extract_libsodium()
   puts "Downloading latest stable release of 'libsodium'"
-  libsodium_dir = "build/libsodium"
   pkg_name      = "libsodium-#{PKG_VER}"
   pkg           = "#{pkg_name}.tar.gz"
   url           = "https://github.com/jedisct1/libsodium/releases/download/#{PKG_VER}/#{pkg}"
-  exit 1 unless system("curl -O -L #{url}")
-  exit 1 unless system("tar xzf #{pkg}")
-  FileUtils.mv pkg_name, libsodium_dir
+  exit 1 unless system("cd #{BUILDDIR} && curl -O -L #{url}")
+  exit 1 unless system("cd #{BUILDDIR} && tar xzf #{pkg}")
+  FileUtils.mv "#{BUILDDIR}/#{pkg_name}", "build/libsodium"
+  FileUtils.rm "#{BUILDDIR}/#{pkg}"
 end
 
 def find_sdks
