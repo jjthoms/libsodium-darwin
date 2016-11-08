@@ -261,34 +261,34 @@ for platform in PLATFORMS
 end
 
 # Build a single universal (fat) library file for each platform
-FileUtils.mkdir_p DISTLIBDIR
+# And copy headers
 for platform in PLATFORMS
+  dist_platform_folder = "#{DISTDIR}/#{platform.downcase}"
+  dist_platform_lib    = "#{dist_platform_folder}/lib"
+  FileUtils.mkdir_p dist_platform_lib
+
   # Find libraries for platform
-  lib_name = "libsodium-#{platform}.a"
-  libs     = libs_per_platform[platform]
+  libs                 = libs_per_platform[platform]
 
   # Make sure library list is not empty
   if libs == nil || libs.length == 0
-    warn "Nothing to do for #{lib_name}"
+    warn "Nothing to do for #{LIBNAME}"
     next
   end
 
   # Build universal library file (aka fat binary)
-  lipo_cmd = "#{LIPO} -create #{libs.join(" ")} -output #{DISTLIBDIR}/#{lib_name}"
-  puts "Combining #{libs.length} libraries into #{lib_name}..."
+  lipo_cmd = "#{LIPO} -create #{libs.join(" ")} -output #{dist_platform_lib}/#{LIBNAME}"
+  puts "Combining #{libs.length} libraries into #{LIBNAME} for #{platform}..."
   exit 1 unless system(lipo_cmd)
 
-end
-
-# Copy headers once (they are the same since we're using make install)
-for platform in PLATFORMS
+  # Copy headers for architecture
   for arch in VALID_ARHS_PER_PLATFORM["iOS"]
       include_dir = "#{BUILDDIR}/#{platform}-#{arch}/include"
       if File.directory? include_dir
-        FileUtils.cp_r(include_dir, DISTDIR)
-        break
+        FileUtils.cp_r(include_dir, dist_platform_folder)
       end
   end
+
 end
 
 # Cleanup
