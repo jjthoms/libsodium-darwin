@@ -85,7 +85,7 @@ puts "macOS   SDK version = #{MACOS_SDK_VERSION}"
 puts "watchOS SDK version = #{WATCHOS_SDK_VERSION}"
 puts "tvOS    SDK version = #{TVOS_SDK_VERSION}"
 
-OTHER_CFLAGS            = "-Os -Qunused-arguments"
+OTHER_CFLAGS            = "-Os -Qunused-arguments -fembed-bitcode"
 
 # Cleanup
 if File.directory? BUILDDIR
