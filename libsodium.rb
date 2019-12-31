@@ -22,7 +22,9 @@ def download_and_extract_libsodium()
   puts "Downloading latest stable release of 'libsodium'"
   pkg_name      = "libsodium-#{PKG_VER}"
   pkg           = "#{pkg_name}.tar.gz"
-  url           = "https://github.com/jedisct1/libsodium/releases/download/#{PKG_VER}/#{pkg}"
+  url           = "https://github.com/jedisct1/libsodium/releases/download/#{PKG_VER}-RELEASE/#{pkg}"
+#  "https://github.com/jedisct1/libsodium/releases/download/#{PKG_VER}/#{pkg}"
+  
   exit 1 unless system("cd #{BUILDDIR} && curl -O -L #{url}")
   exit 1 unless system("cd #{BUILDDIR} && tar xzf #{pkg}")
   FileUtils.mv "#{BUILDDIR}/#{pkg_name}", "build/libsodium"
@@ -39,8 +41,6 @@ def find_sdks
       sdk_versions["macOS"]   = $1
     elsif line =~ /-sdk appletvos(\S+)/
       sdk_versions["tvOS"]    = $1
-#    elsif line =~ /-sdk watchos(\S+)/
-#      sdk_versions["watchOS"] = $1
     end
   end
   return sdk_versions
@@ -53,14 +53,12 @@ PKG_VER                 = "1.0.18"
 IOS_VERSION_MIN         = 11.0
 MACOS_VERSION_MIN       = 10.13
 TVOS_VERSION_MIN        = 11.0
-#WATCHOS_VERSION_MIN     = 2.0
 
 LIBNAME                 = "libsodium.a"
 VALID_ARHS_PER_PLATFORM = {
   "iOS"     => ["arm64", "x86_64"],
   "macOS"   => ["x86_64"],
   "tvOS"    => ["arm64", "x86_64"],
-#  "watchOS" => ["armv7k", "i386"],
 }
 DEVELOPER               = `xcode-select -print-path`.chomp
 LIPO                    = `xcrun -sdk iphoneos -find lipo`.chomp
@@ -78,11 +76,9 @@ sdk_versions            = find_sdks()
 IOS_SDK_VERSION         = sdk_versions["iOS"]
 MACOS_SDK_VERSION       = sdk_versions["macOS"]
 TVOS_SDK_VERSION        = sdk_versions["tvOS"]
-#WATCHOS_SDK_VERSION     = sdk_versions["watchOS"]
 
 puts "iOS     SDK version = #{IOS_SDK_VERSION}"
 puts "macOS   SDK version = #{MACOS_SDK_VERSION}"
-#puts "watchOS SDK version = #{WATCHOS_SDK_VERSION}"
 puts "tvOS    SDK version = #{TVOS_SDK_VERSION}"
 
 OTHER_CFLAGS            = "-Os -Qunused-arguments -fembed-bitcode"
