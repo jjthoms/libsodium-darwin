@@ -39,28 +39,28 @@ def find_sdks
       sdk_versions["macOS"]   = $1
     elsif line =~ /-sdk appletvos(\S+)/
       sdk_versions["tvOS"]    = $1
-    elsif line =~ /-sdk watchos(\S+)/
-      sdk_versions["watchOS"] = $1
+#    elsif line =~ /-sdk watchos(\S+)/
+#      sdk_versions["watchOS"] = $1
     end
   end
   return sdk_versions
 end
 
 # libsodium release version
-PKG_VER                 = "1.0.11"
+PKG_VER                 = "1.0.18"
 
 # Minimum platform versions
-IOS_VERSION_MIN         = 9.0
-MACOS_VERSION_MIN       = 10.11
-TVOS_VERSION_MIN        = 9.0
-WATCHOS_VERSION_MIN     = 2.0
+IOS_VERSION_MIN         = 11.0
+MACOS_VERSION_MIN       = 10.13
+TVOS_VERSION_MIN        = 11.0
+#WATCHOS_VERSION_MIN     = 2.0
 
 LIBNAME                 = "libsodium.a"
 VALID_ARHS_PER_PLATFORM = {
-  "iOS"     => ["armv7", "armv7s", "arm64", "i386", "x86_64"],
+  "iOS"     => ["arm64", "x86_64"],
   "macOS"   => ["x86_64"],
   "tvOS"    => ["arm64", "x86_64"],
-  "watchOS" => ["armv7k", "i386"],
+#  "watchOS" => ["armv7k", "i386"],
 }
 DEVELOPER               = `xcode-select -print-path`.chomp
 LIPO                    = `xcrun -sdk iphoneos -find lipo`.chomp
@@ -78,11 +78,11 @@ sdk_versions            = find_sdks()
 IOS_SDK_VERSION         = sdk_versions["iOS"]
 MACOS_SDK_VERSION       = sdk_versions["macOS"]
 TVOS_SDK_VERSION        = sdk_versions["tvOS"]
-WATCHOS_SDK_VERSION     = sdk_versions["watchOS"]
+#WATCHOS_SDK_VERSION     = sdk_versions["watchOS"]
 
 puts "iOS     SDK version = #{IOS_SDK_VERSION}"
 puts "macOS   SDK version = #{MACOS_SDK_VERSION}"
-puts "watchOS SDK version = #{WATCHOS_SDK_VERSION}"
+#puts "watchOS SDK version = #{WATCHOS_SDK_VERSION}"
 puts "tvOS    SDK version = #{TVOS_SDK_VERSION}"
 
 OTHER_CFLAGS            = "-Os -Qunused-arguments -fembed-bitcode"
@@ -248,7 +248,7 @@ for platform in PLATFORMS
 
     puts "Building #{LIBNAME} for #{arch}..."
     exit 1 unless system("make clean")
-    exit 1 unless system("make -j8 V=0")
+    exit 1 unless system("make -j V=0")
     exit 1 unless system("make install")
 
     # Add to the architecture-dependent library list for the current platform
