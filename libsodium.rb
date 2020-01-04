@@ -39,8 +39,8 @@ def find_sdks
       sdk_versions["iOS"]     = $1
     elsif line =~ /-sdk macosx(\S+)/
       sdk_versions["macOS"]   = $1
-    elsif line =~ /-sdk appletvos(\S+)/
-      sdk_versions["tvOS"]    = $1
+#    elsif line =~ /-sdk appletvos(\S+)/
+#      sdk_versions["tvOS"]    = $1
     end
   end
   return sdk_versions
@@ -52,13 +52,13 @@ PKG_VER                 = "1.0.18"
 # Minimum platform versions
 IOS_VERSION_MIN         = 11.0
 MACOS_VERSION_MIN       = 10.13
-TVOS_VERSION_MIN        = 11.0
+#TVOS_VERSION_MIN        = 11.0
 
 LIBNAME                 = "libsodium.a"
 VALID_ARHS_PER_PLATFORM = {
   "iOS"     => ["arm64", "x86_64"],
   "macOS"   => ["x86_64"],
-  "tvOS"    => ["arm64", "x86_64"],
+#  "tvOS"    => ["arm64", "x86_64"],
 }
 DEVELOPER               = `xcode-select -print-path`.chomp
 LIPO                    = `xcrun -sdk iphoneos -find lipo`.chomp
@@ -75,11 +75,11 @@ DISTLIBDIR              = "#{DISTDIR}/lib"
 sdk_versions            = find_sdks()
 IOS_SDK_VERSION         = sdk_versions["iOS"]
 MACOS_SDK_VERSION       = sdk_versions["macOS"]
-TVOS_SDK_VERSION        = sdk_versions["tvOS"]
+#TVOS_SDK_VERSION        = sdk_versions["tvOS"]
 
 puts "iOS     SDK version = #{IOS_SDK_VERSION}"
 puts "macOS   SDK version = #{MACOS_SDK_VERSION}"
-puts "tvOS    SDK version = #{TVOS_SDK_VERSION}"
+#puts "tvOS    SDK version = #{TVOS_SDK_VERSION}"
 
 OTHER_CFLAGS            = "-Os -Qunused-arguments -fembed-bitcode"
 
@@ -278,7 +278,7 @@ for platform in PLATFORMS
   exit 1 unless system(lipo_cmd)
 
   # Copy headers for architecture
-  for arch in VALID_ARHS_PER_PLATFORM["iOS"]
+  for arch in VALID_ARHS_PER_PLATFORM["#{platform}"]
       include_dir = "#{BUILDDIR}/#{platform}-#{arch}/include"
       if File.directory? include_dir
         FileUtils.cp_r(include_dir, dist_platform_folder)
